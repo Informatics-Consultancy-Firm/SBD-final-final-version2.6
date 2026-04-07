@@ -223,7 +223,7 @@ window.pwaDoInstall = async function() {
         const { outcome } = await deferredPrompt.userChoice;
         deferredPrompt = null;
         if (outcome === 'accepted') {
-            _pwaSuccess();
+            _pwaSuccess();    
         } else {
             _pwaBannerHide();
             if (btn) { btn.textContent = 'INSTALL'; btn.disabled = false; }
