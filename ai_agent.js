@@ -1,6 +1,6 @@
 // ============================================================
 //  ICF-SL  ai_agent.js
-//  • Analysis dashboard — fetches from Google Sheets via GAS
+//  • Analysis dashboard — fetches from ICF-SL Server via GAS
 //  • AI Agent modal (GAS-backed Claude chat)
 // ============================================================
 (function () {
@@ -191,7 +191,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </div>
-        <div class="icf-foot">Session state + Google Sheet · API key never leaves the server</div>
+        <div class="icf-foot">Session state + ICF-SL Server · API key never leaves the server</div>
       </div>
     </div>`);
 
@@ -244,7 +244,7 @@
             }
         }catch(e){console.warn('[Analysis] GAS getData:',e.message);}
 
-        // ── Method 2: Direct Google Sheets CSV export ───────────
+        // ── Method 2: Direct ICF-SL Server CSV export ───────────
         try{
             const csvUrl=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
             const rows=await new Promise((resolve,reject)=>{
@@ -440,7 +440,7 @@
         if(!total){
             body.innerHTML=`<div class="an-no-data">
               <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 3h18v18H3zM3 9h18M9 21V9"/></svg>
-              <div style="margin-bottom:12px;">No submissions found. ${_sheetRows.length===0?'Could not load data from Google Sheets — try refreshing.':'No data matches the selected filters.'}</div>
+              <div style="margin-bottom:12px;">No submissions found. ${_sheetRows.length===0?'Could not load data from ICF-SL Server — try refreshing.':'No data matches the selected filters.'}</div>
               ${_sheetRows.length===0?`<button onclick="anRefresh()" style="background:#004080;color:#fff;border:none;border-radius:8px;padding:9px 20px;font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.5px;cursor:pointer;">↻ RETRY FETCH</button>`:''}
             </div>`;
             return;
@@ -700,7 +700,7 @@
     }
 
     function getSubmittedSet() {
-        // Returns Set of lowercase district|chiefdom|phu|community|school keys from Google Sheets only
+        // Returns Set of lowercase district|chiefdom|phu|community|school keys from ICF-SL Server only
         return new Set(
             (_sheetRows || [])
                 .filter(r => r.school_name)
@@ -734,11 +734,11 @@
         const sheetBanner = _sheetRows.length === 0
             ? `<div class="alert" style="background:#fff8e1;border:1px solid #ffe082;border-radius:9px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-size:12px;color:#8a6500;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#c8991a" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                Submission counts show Google Sheets data only. Hit <strong>REFRESH</strong> to pull the latest from the server.
+                Submission counts show ICF-SL Server data only. Hit <strong>REFRESH</strong> to pull the latest from the server.
               </div>`
             : `<div class="alert" style="background:#e8f5e9;border:1px solid #b2dfcc;border-radius:9px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-size:12px;color:#2e7d32;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#28a745" stroke-width="2" width="16" height="16"><path d="M9 11l3 3L22 4"/></svg>
-                Showing <strong>${_sheetRows.length} submissions</strong> from Google Sheets.
+                Showing <strong>${_sheetRows.length} submissions</strong> from ICF-SL Server.
               </div>`;
         let natSchools = 0, natDone = 0;
         districts.forEach(d => {
@@ -957,7 +957,7 @@
 
         const body=document.getElementById('analysisBody');
         const sub=document.getElementById('anSubtitle');
-        if(body)body.innerHTML=`<div class="an-loading"><div class="an-spinner"></div><div class="an-load-txt">Fetching data from Google Sheets…</div></div>`;
+        if(body)body.innerHTML=`<div class="an-loading"><div class="an-spinner"></div><div class="an-load-txt">Fetching data from ICF-SL Server…</div></div>`;
         if(sub)sub.textContent='Loading…';
 
         // Fetch submissions; targets come from the CSV already in memory
@@ -975,7 +975,7 @@
 
     window.anRefresh=async function(){
         const body=document.getElementById('analysisBody');
-        if(body)body.innerHTML=`<div class="an-loading"><div class="an-spinner"></div><div class="an-load-txt">Refreshing from Google Sheets…</div></div>`;
+        if(body)body.innerHTML=`<div class="an-loading"><div class="an-spinner"></div><div class="an-load-txt">Refreshing from ICF-SL Server…</div></div>`;
         const rows = await fetchSheetData();
         _sheetRows = rows;
         window._TARGETS = buildTargetsFromCSV();
