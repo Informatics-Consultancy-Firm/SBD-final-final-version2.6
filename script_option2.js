@@ -162,7 +162,7 @@ let deferredPrompt    = null;
 function cacheImagesForOffline() {
     const imagesToCache = [
         'ICF-SL.jpg','logo_mohs.png','logo_nmcp.png','logo_pmi.png',
-        'infographics.png','favicon.svg','icon-192.svg','video.mp4'
+        'infographics.png','favicon.svg','icon-192.svg'
     ];
     if ('caches' in window) {
         caches.open('itn-images-v1').then(cache => {
@@ -443,7 +443,6 @@ async function init() {
     loadFromStorage();
     injectSummaryModal();
     setupInstallButton();
-    initAppLock();
     try {
         await loadLocationData();
     } catch (e) {
@@ -2205,6 +2204,17 @@ window.doSubmit = async function() {
                 body: JSON.stringify(data)
             });
             markSchoolSubmitted(data);
+            // Lock form — one submission per session
+            setTimeout(() => {
+                const fw = document.getElementById('formCardWrap');
+                if (fw) fw.style.display = 'none';
+                const dataEntryBtn = document.querySelector('[onclick*="dataentry"]');
+                if (dataEntryBtn) {
+                    dataEntryBtn.disabled = true;
+                    dataEntryBtn.style.opacity = '0.4';
+                    dataEntryBtn.title = 'Already submitted';
+                }
+            }, 500);
             clearDraft();
             saveToStorage(); updateCounts(); updateSummaryBadge();
             showThankYouModal(data, false);
@@ -2247,11 +2257,13 @@ function showThankYouModal(data, offline) {
                 </div>
                 <div style="padding:22px 24px;background:#fff;">
                     <div id="tySummary" style="background:#f0f9f3;border:2px solid #b2dfcc;border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;"></div>
-                    <button onclick="window.doAnotherSubmission()"
-                        style="width:100%;padding:13px;background:#004080;color:#fff;border:none;border-radius:9px;font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;letter-spacing:.8px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;touch-action:manipulation;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="17" height="17"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        SUBMIT ANOTHER SCHOOL
-                    </button>
+                    <div style="text-align:center;padding:10px 0 4px;">
+                        <div style="font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;color:#28a745;letter-spacing:.4px;">✅ SUBMISSION COMPLETE</div>
+                        <div style="font-size:12px;color:#607080;margin-top:6px;">Hand device back to your supervisor.</div>
+                        <div style="margin-top:14px;background:#fff8e1;border:1px solid #ffc107;border-radius:8px;padding:10px;font-size:11px;color:#8a6500;">
+                            🔒 This session is now closed. Only a supervisor can start a new entry.
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>`);
@@ -2292,15 +2304,16 @@ function showThankYouModal(data, offline) {
         </div>`;
 
     document.getElementById('thankYouModal').classList.add('show');
+
+    // Lock form — hide it and mark session as done
+    window._sessionSubmitted = true;
+    const formCard = document.getElementById('formCardWrap');
+    if (formCard) formCard.style.display = 'none';
+    // Lock DATA ENTRY tab — remove from unlocked sessions
+    if (window._unlocked) window._unlocked['dataentry'] = false;
 }
 
-window.doAnotherSubmission = function() {
-    document.getElementById('thankYouModal')?.classList.remove('show');
-    resetForm();
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    showNotification('Form cleared — ready for next school.', 'info');
-};
+// doAnotherSubmission removed — one submission per session
 
 function markSchoolSubmitted(data) {
     const key=makeSchoolKey(data.district,data.chiefdom,data.facility,data.community,data.school_name);
