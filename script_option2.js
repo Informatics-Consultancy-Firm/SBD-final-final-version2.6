@@ -932,44 +932,26 @@ function setupSchoolSubmissionCheck() {
     schoolSel.addEventListener('change', async function() {
         const key = currentSchoolKey();
 
-        // ── Show common fields + nav whenever a school is selected ─
-        const cf  = document.getElementById('commonFields');
+        // ── Show cascading block + common fields + nav ──────────
+        const mb  = document.getElementById('manualEntryBlock');
         const nav = document.getElementById('sectionBNav');
-        if (key && cf)  cf.style.display  = 'block';
+        if (mb)  mb.style.display  = 'block';
         if (key && nav) nav.style.display = 'flex';
 
-        // ── Auto-fill school metadata from CSV ─────────────────
-        const meta = window.CSV_SCHOOL_DATA && window.CSV_SCHOOL_DATA[key];
+        // ── Fill school metadata from CSV (same as cascading) ───
+        const enrEl  = document.getElementById('school_enrollment');
+        const emisEl = document.getElementById('emis_number');
+        const stEl   = document.getElementById('school_status');
+        const meta   = window.CSV_SCHOOL_DATA && window.CSV_SCHOOL_DATA[key];
         if (meta) {
-            const enrEl = document.getElementById('school_enrollment');
-            const emisEl = document.getElementById('emis_number');
-            const stEl  = document.getElementById('school_status');
-            if (enrEl && meta.enrollment) {
-                enrEl.value = meta.enrollment;
-                enrEl.readOnly = true;
-                enrEl.style.background = '#e8f5ee';
-                enrEl.style.borderColor = '#28a745';
-            }
-            if (emisEl && meta.emis) {
-                emisEl.value = meta.emis;
-                emisEl.readOnly = true;
-                emisEl.style.background = '#e8f5ee';
-                emisEl.style.borderColor = '#28a745';
-            }
-            if (stEl && meta.status) {
-                stEl.value = meta.status;
-                stEl.style.background = '#e8f5ee';
-                stEl.style.borderColor = '#28a745';
-                stEl.style.pointerEvents = 'none';
-            }
+            if (enrEl)  enrEl.value  = meta.enrollment || '';
+            if (emisEl) emisEl.value = meta.emis       || '';
+            if (stEl)   stEl.value   = meta.status     || '';
         } else {
-            // School not in CSV (new school) — clear and allow manual entry
-            const enrEl = document.getElementById('school_enrollment');
-            const emisEl = document.getElementById('emis_number');
-            const stEl  = document.getElementById('school_status');
-            if (enrEl) { enrEl.value=''; enrEl.readOnly=false; enrEl.style.background=''; enrEl.style.borderColor=''; }
-            if (emisEl) { emisEl.value=''; emisEl.readOnly=false; emisEl.style.background=''; emisEl.style.borderColor=''; }
-            if (stEl) { stEl.value='New'; stEl.style.background=''; stEl.style.borderColor=''; stEl.style.pointerEvents=''; }
+            // School not in CSV — clear fields
+            if (enrEl)  enrEl.value  = '';
+            if (emisEl) emisEl.value = '';
+            if (stEl)   stEl.value   = '';
         }
 
         // Reset state when school changes
