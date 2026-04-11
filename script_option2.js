@@ -967,11 +967,9 @@ function setupSchoolSubmissionCheck() {
                 enrGrp.style.display = 'block';
             } else if (enrGrp) enrGrp.style.display = 'none';
 
-            // EMIS
-            if (meta.emis && emisEl && emisGrp) {
-                emisEl.value = meta.emis;
-                emisGrp.style.display = 'block';
-            } else if (emisGrp) emisGrp.style.display = 'none';
+            // EMIS — always show so user can fill if CSV has no value
+            if (emisEl) emisEl.value = meta.emis || '';
+            if (emisGrp) emisGrp.style.display = 'block';
 
             // Status — always show if available (Old or New from CSV)
             if (meta.status && stEl && stGrp) {
