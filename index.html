@@ -881,7 +881,7 @@
                                 </div>
 
                                 <!-- SECTION 3: SCHOOL DETAILS (QR or Manual) -->
-                                <div class="form-section" data-section="5">
+                                <div class="form-section" data-section="3">
                                     <div class="section-header">
                                         <div class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
                                         <div><h2 class="section-title">SECTION B: SCHOOL DETAILS</h2><p class="section-description">School location and identification details</p></div>
@@ -957,7 +957,7 @@
                                 </div>
 
                                 <!-- SECTION 4: HEADMASTER INFORMATION -->
-                                <div class="form-section" data-section="6">
+                                <div class="form-section" data-section="4">
                                     <div class="section-header">
                                         <div class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
                                         <div><h2 class="section-title">SECTION C: HEADMASTER INFORMATION</h2><p class="section-description">Head Teacher details and distribution date</p></div>
@@ -1605,21 +1605,25 @@ window.showEntryMethodModal = function() {
 
 // Ensure Section B always shows content — if no method chosen, show modal
 window.ensureSectionBVisible = function() {
-    // Section 3 — show correct block based on method chosen
-    if (state && state.currentSection === 3) {
-        const qrBlock     = document.getElementById('qrScanBlock');
-        const manualBlock = document.getElementById('manualEntryBlock');
-        const nav         = document.getElementById('sectionBNav');
-        if (window._entryMethod === 'qr') {
-            if (qrBlock)     qrBlock.style.display    = 'block';
-            if (manualBlock) manualBlock.style.display = 'none';
-            if (nav)         nav.style.display         = 'flex';
-        } else if (window._entryMethod === 'manual') {
-            if (qrBlock)     qrBlock.style.display    = 'none';
-            if (manualBlock) manualBlock.style.display = 'block';
-            if (nav)         nav.style.display         = 'flex';
-        }
+    // Only act when on section 3 (school details)
+    if (!state || state.currentSection !== 3) return;
+    var qrBlock     = document.getElementById('qrScanBlock');
+    var manualBlock = document.getElementById('manualEntryBlock');
+    var nav         = document.getElementById('sectionBNav');
+    var method      = window._entryMethod;
+    if (!method) {
+        // No method chosen — go back to section 2
+        previousSection && previousSection();
+        return;
     }
+    if (method === 'qr') {
+        if (qrBlock)     qrBlock.style.display    = 'block';
+        if (manualBlock) manualBlock.style.display = 'none';
+    } else {
+        if (qrBlock)     qrBlock.style.display    = 'none';
+        if (manualBlock) manualBlock.style.display = 'block';
+    }
+    if (nav) nav.style.display = 'flex';
 };
 
 window.selectEntryMethod = function(method) {
@@ -1667,17 +1671,20 @@ window.selectMethod = function(method) {
 
 // proceedFromMethodSection — moves from section 2 to 3 and shows right block
 window.proceedFromMethodSection = function() {
-    const method = window._entryMethod;
+    var method = window._entryMethod;
     if (!method) { showNotification('Please choose a method first.', 'error'); return; }
+    // Move to section 3
     nextSection();
-    const qrBlock     = document.getElementById('qrScanBlock');
-    const manualBlock = document.getElementById('manualEntryBlock');
-    const nav         = document.getElementById('sectionBNav');
+    // Show correct block in section 3
+    var qrBlock     = document.getElementById('qrScanBlock');
+    var manualBlock = document.getElementById('manualEntryBlock');
+    var nav         = document.getElementById('sectionBNav');
     if (method === 'qr') {
         if (qrBlock)     qrBlock.style.display    = 'block';
         if (manualBlock) manualBlock.style.display = 'none';
         if (nav)         nav.style.display         = 'flex';
         setTimeout(function(){ window.startSchoolQRScan && window.startSchoolQRScan(); }, 400);
+        showNotification('Point camera at the school QR code', 'info');
     } else {
         if (qrBlock)     qrBlock.style.display    = 'none';
         if (manualBlock) manualBlock.style.display = 'block';
