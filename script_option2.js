@@ -312,6 +312,10 @@ async function init() {
     loadFromStorage();
     injectSummaryModal();
     setupInstallButton();
+    // Update status immediately on load — don't wait for startApp
+    state.isOnline = navigator.onLine;
+    const _st = document.getElementById('statusText');
+    if (_st) _st.textContent = state.isOnline ? 'ONLINE' : 'OFFLINE';
     try {
         await loadLocationData();
     } catch (e) {
