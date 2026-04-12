@@ -730,14 +730,16 @@ function enterApp() {
     currentUser.full_name + ' · ' + currentUser.role + ' · ' + currentUser.district;
 
   var role = (currentUser.role || '').trim();
-  var isDMS = role === 'DMS Staff';
-  var isConveyor = role === 'Conveyor';
 
-  if (!isDMS && !isConveyor) {
-    // Role not recognised — show error on login screen
+  // Allowed DMS roles (from QR generator)
+  var DMS_ROLES = ['National Monitor','SQOs','District Supervisor','Chiefdom Supervisor','DHMT','DMS Staff'];
+  var isConveyor = role === 'Conveyor';
+  var isDMS      = DMS_ROLES.indexOf(role) !== -1;
+
+  if (!isConveyor && !isDMS) {
     document.getElementById('scr-login').classList.add('active');
     document.getElementById('scr-app').classList.remove('active');
-    showLoginErr('Role "' + role + '" is not allowed. Only DMS Staff or Conveyor can access this app.');
+    showLoginErr('Access denied. Role "' + role + '" is not authorised to use this app.');
     currentUser = null;
     return;
   }
@@ -913,11 +915,12 @@ function verifyDriver(qrText) {
     catch(e) { parsed.id = qrText.trim(); }
   }
 
-  // Check role
-  if (parsed.role && parsed.role.toLowerCase() !== 'conveyor') {
+  // Check role — must be Conveyor
+  if (!parsed.role || parsed.role.toLowerCase() !== 'conveyor') {
     resultEl.classList.remove('show');
-    notFoundEl.querySelector ? notFoundEl.textContent = (parsed.name || 'This person') + ' is a ' + parsed.role + ', not a Conveyor.' : null;
-    notFoundEl.classList.add('show');
+    document.getElementById('driverNotFound').textContent =
+      parsed.role ? (parsed.name || 'This person') + ' is a ' + parsed.role + ', not a Conveyor.' : 'Role not found in QR.';
+    document.getElementById('driverNotFound').classList.add('show');
     form.verifiedDriver = null; return;
   }
 
